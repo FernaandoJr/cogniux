@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { ProfessorLayout } from "@/routes/ProfessorLayout";
-import { StudentPortal } from "@/components/StudentPortal";
+import { LandingPage } from "@/pages/LandingPage";
+import { AuthPage } from "@/pages/AuthPage";
 import { Dashboard } from "@/components/Dashboard";
 import { ExamCreator } from "@/components/ExamCreator";
 import { ExamDetail } from "@/components/ExamDetail";
@@ -15,8 +16,9 @@ export function AppRouter() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/portal" replace />} />
-      <Route path="/portal" element={<StudentPortal />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/portal" element={<Navigate to="/auth" replace />} />
       <Route path="/online/:examId" element={<OnlineExam />} />
 
       <Route element={<ProtectedRoute />}>
@@ -31,7 +33,7 @@ export function AppRouter() {
         </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/portal" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
