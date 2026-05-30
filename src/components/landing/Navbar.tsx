@@ -17,11 +17,13 @@ const navLinks = [
 interface LandingNavbarProps {
   disableSticky?: boolean;
   forceBlur?: boolean;
+  trailingSlot?: React.ReactNode;
 }
 
 export function LandingNavbar({
   disableSticky = false,
   forceBlur = false,
+  trailingSlot,
 }: LandingNavbarProps) {
   const [open, setOpen] = useState(false);
   const scrolled = useScroll(10);
@@ -70,20 +72,22 @@ export function LandingNavbar({
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          {isLoggedIn ? (
-            <Link
-              to="/dashboard"
-              className={cn(buttonVariants({ variant: "ghost" }))}
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              to="/auth"
-              className={cn(buttonVariants({ variant: "default" }), "rounded-full px-6")}
-            >
-              Entrar
-            </Link>
+          {trailingSlot ?? (
+            isLoggedIn ? (
+              <Link
+                to="/dashboard"
+                className={cn(buttonVariants({ variant: "ghost" }))}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/auth"
+                className={cn(buttonVariants({ variant: "default" }), "rounded-full px-6")}
+              >
+                Entrar
+              </Link>
+            )
           )}
           <Button
             variant="outline"

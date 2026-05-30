@@ -7,20 +7,26 @@ import { queryKeys } from "@/lib/queryKeys";
 import type { ExamStats, Submission } from "@/types";
 
 export type SubmissionScoresCache = {
-  scores: Pick<Submission, "score">[];
+  scores: Pick<Submission, "score" | "studentName">[];
+  scoresByExamId: Record<string, Pick<Submission, "score" | "studentName">[]>;
   statsByExamId: Record<string, ExamStats>;
   ready: boolean;
 };
 
 const emptyCache = (examIds: string[]): SubmissionScoresCache => ({
   scores: [],
+  scoresByExamId: {},
   statsByExamId: buildSubmissionStatsByExam(examIds, {}),
   ready: examIds.length === 0,
 });
 
+function pick(d: Submission) {
+  return { score: d.score, studentName: d.studentName };
+}
+
 export function useSubmissionScores(examIds: string[]) {
   const queryClient = useQueryClient();
-  const perExamRef = useRef<Map<string, Pick<Submission, "score">[]>>(new Map());
+  const perExamRef = useRef<Map<string, Pick<Submission, "score" | "studentName">[]>>(new Map());
   const idsKey = examIds.join(",");
 
   useEffect(() => {
@@ -36,10 +42,11 @@ export function useSubmissionScores(examIds: string[]) {
     const rebuild = () => {
       const byExamId = Object.fromEntries(
         ids.map((id) => [id, perExamRef.current.get(id) ?? []])
-      ) as Record<string, Pick<Submission, "score">[]>;
+      ) as Record<string, Pick<Submission, "score" | "studentName">[]>;
       const scores = ids.flatMap((id) => byExamId[id] ?? []);
       queryClient.setQueryData(queryKeys.submissionScores(ids), {
         scores,
+        scoresByExamId: byExamId,
         statsByExamId: buildSubmissionStatsByExam(ids, byExamId),
         ready: true,
       });
@@ -47,10 +54,7 @@ export function useSubmissionScores(examIds: string[]) {
 
     const unsubs = ids.map((id) =>
       onSnapshot(collection(db, "exams", id, "submissions"), (snap) => {
-        perExamRef.current.set(
-          id,
-          snap.docs.map((d) => ({ score: (d.data() as Submission).score }))
-        );
+        perExamRef.current.set(id, snap.docs.map((d) => pick(d.data() as Submission)));
         rebuild();
       })
     );
@@ -68,12 +72,13 @@ export function useSubmissionScores(examIds: string[]) {
       const byExamId = Object.fromEntries(
         examIds.map((id, i) => [
           id,
-          snaps[i].docs.map((d) => ({ score: (d.data() as Submission).score })),
+          snaps[i].docs.map((d) => pick(d.data() as Submission)),
         ])
-      ) as Record<string, Pick<Submission, "score">[]>;
+      ) as Record<string, Pick<Submission, "score" | "studentName">[]>;
       const scores = examIds.flatMap((id) => byExamId[id] ?? []);
       return {
         scores,
+        scoresByExamId: byExamId,
         statsByExamId: buildSubmissionStatsByExam(examIds, byExamId),
         ready: true,
       };
@@ -85,6 +90,7 @@ export function useSubmissionScores(examIds: string[]) {
   const cache = data ?? emptyCache(examIds);
   return {
     scores: cache.scores,
+    scoresByExamId: cache.scoresByExamId,
     statsByExamId: cache.statsByExamId,
     ready: cache.ready,
   };

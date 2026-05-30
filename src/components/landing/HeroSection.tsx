@@ -1,29 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Dithering } from "@paper-design/shaders-react";
 import { useAuth } from "@/hooks/useAuth";
-
-function useIsDark() {
-  const [isDark, setIsDark] = useState(
-    () => typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
-  );
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
-  return isDark;
-}
+import { useIsDark } from "@/hooks/useIsDark";
+import { usePrimaryHex } from "@/hooks/usePrimaryHex";
 
 export function HeroSection() {
   const { user, loading } = useAuth();
   const isDark = useIsDark();
+  const primaryHex = usePrimaryHex();
   const isLoggedIn = !!user;
 
   return (
@@ -34,7 +19,7 @@ export function HeroSection() {
             <div className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply">
               <Dithering
                 colorBack={isDark ? "#000000" : "#ffffff"}
-                colorFront="#aff33e"
+                colorFront={primaryHex}
                 shape="warp"
                 type="4x4"
                 speed={0.8}

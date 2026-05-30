@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -84,7 +83,24 @@ export function ExamDetail() {
   }, [submissionToPrint]);
 
   if (!examId) return null;
-  if (loading && !exam) return <Skeleton className="h-64 w-full" />;
+  if (loading && !exam) return (
+    <div className="space-y-6">
+      <div className="pb-4 border-b space-y-3">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+      <div className="flex gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-24 rounded-md" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
   if (!exam) return <p className="text-center p-8">Prova não encontrada.</p>;
 
   const stats = calculateExamStats(submissions);
@@ -211,17 +227,17 @@ export function ExamDetail() {
         </AlertDialog>
       </div>
 
-      <Card>
-        <CardHeader className="border-b">
+      <div>
+        <div className="pb-4 border-b mb-4">
           <div className="flex flex-col md:flex-row justify-between gap-2">
             <div>
-              <CardTitle className="text-2xl flex items-center gap-1 group/edit">
+              <h2 className="text-2xl font-semibold flex items-center gap-1 group/edit">
                 <span className="group-hover/edit:underline">{exam.subject}</span>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/exam/${examId}/edit`)} aria-label="Editar">
+                <Button variant="ghost" size="icon" className="h-7 w-7 cursor-pointer" onClick={() => navigate(`/exams/${examId}/edit`)} aria-label="Editar">
                   <Edit2 size={15} />
                 </Button>
-              </CardTitle>
-              <CardDescription>{exam.semester}</CardDescription>
+              </h2>
+              <p className="text-sm text-muted-foreground">{exam.semester}</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-center">
@@ -236,9 +252,9 @@ export function ExamDetail() {
               </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="">
-          <Tabs value={activeTab} onValueChange={(val) => navigate(`/exam/${examId}/${val}`)}>
+        </div>
+        <div>
+          <Tabs value={activeTab} onValueChange={(val) => navigate(`/exams/${examId}/${val}`)}>
             <div className="overflow-x-auto overflow-y-hidden pb-2">
               <TabsList className="gap-1 w-max" variant={"line"}>
                 <TabsTrigger value="overview">Resumo</TabsTrigger>
@@ -290,7 +306,7 @@ export function ExamDetail() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 cursor-pointer"
                     onClick={() => setAnswerKeyVisible((v) => !v)}
                     aria-label={answerKeyVisible ? "Ocultar gabarito" : "Revelar gabarito"}
                   >
@@ -591,8 +607,8 @@ export function ExamDetail() {
             </TabsContent>
 
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       {printSubmissionNode}
     </div>
   );

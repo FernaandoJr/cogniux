@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -210,7 +209,7 @@ function ExamEditForm({
       void queryClient.invalidateQueries({ queryKey: queryKeys.exam(editId), refetchType: "none" });
       void queryClient.invalidateQueries({ queryKey: queryKeys.exams(user.uid), refetchType: "none" });
       toast.success("Prova atualizada com sucesso!");
-      navigate(`/exam/${editId}/overview`, { replace: true });
+      navigate(`/exams/${editId}/overview`, { replace: true });
     } catch (error) {
       toast.error(getFirestoreErrorMessage(error, getFirebaseConfig().projectId));
     } finally {
@@ -221,21 +220,16 @@ function ExamEditForm({
   return (
     <div className="mx-auto w-full max-w-2xl space-y-4 pb-12">
       <div className="flex items-center justify-between gap-2">
-        <Button variant="ghost" onClick={() => navigate(`/exam/${editId}/overview`)}>
+        <Button variant="ghost" className="cursor-pointer" onClick={() => navigate("/exams")}>
           <ArrowLeft className="mr-2" size={18} /> Voltar
         </Button>
-        <Button onClick={() => void handleSave()} disabled={loading}>
+        <Button className="cursor-pointer" onClick={() => void handleSave()} disabled={loading}>
           {loading && <Loader2 className="animate-spin mr-2" size={18} />}
           Salvar
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Editar Atividade</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={(e) => { e.preventDefault(); void handleSave(); }} className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); void handleSave(); }} className="space-y-4">
             <div className="space-y-2">
               <FieldLabel htmlFor="subject" required>Matéria / UC</FieldLabel>
               <Input id="subject" {...form.register("subject")} placeholder="Ex: Algoritmos II" />
@@ -312,9 +306,7 @@ function ExamEditForm({
             </div>
 
             <button type="submit" className="hidden" />
-          </form>
-        </CardContent>
-      </Card>
+      </form>
     </div>
   );
 }
@@ -481,7 +473,7 @@ function ExamCreatorForm({
       ]);
 
       toast.success("Prova salva com sucesso!");
-      navigate(`/exam/${targetId}`, { replace: true });
+      navigate(`/exams/${targetId}`, { replace: true });
 
       void queryClient.invalidateQueries({ queryKey: queryKeys.exams(user.uid), refetchType: "none" });
       void queryClient.invalidateQueries({ queryKey: queryKeys.exam(targetId), refetchType: "none" });
@@ -496,18 +488,18 @@ function ExamCreatorForm({
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 pb-12">
       <div className="flex items-center justify-between gap-2">
-        <Button variant="ghost" onClick={() => (step === 2 ? setStep(1) : navigate("/dashboard"))}>
+        <Button variant="ghost" className="cursor-pointer" onClick={() => (step === 2 ? setStep(1) : navigate("/exams"))}>
           <ArrowLeft className="mr-2" size={18} /> Voltar
         </Button>
         {step === 1 ? (
-          <Button type="submit" form="exam-creator-step1">
+          <Button type="submit" form="exam-creator-step1" className="cursor-pointer">
             Continuar
           </Button>
         ) : (
           <AlertDialog>
             <AlertDialogTrigger
               render={
-                <Button type="button" disabled={loading}>
+                <Button type="button" className="cursor-pointer" disabled={loading}>
                   {loading && <Loader2 className="animate-spin mr-2" size={18} />}
                   Salvar
                 </Button>
@@ -533,12 +525,7 @@ function ExamCreatorForm({
       </div>
 
       {step === 1 ? (
-        <Card className="overflow-visible">
-          <CardHeader>
-            <CardTitle>{editId ? "Editar Atividade" : "Criar Nova Atividade"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form id="exam-creator-step1" onSubmit={handleNext} className="space-y-6">
+        <form id="exam-creator-step1" onSubmit={handleNext} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -692,7 +679,7 @@ function ExamCreatorForm({
                   <Button
                     type="button"
                     variant={hasGeneratedWithAI ? "secondary" : "outline"}
-                    className="w-full"
+                    className="w-full cursor-pointer"
                     disabled={aiGenerating}
                     onClick={handleGenerateAI}
                   >
@@ -705,20 +692,15 @@ function ExamCreatorForm({
                   </Button>
                 </div>
               </div>
-            </form>
-          </CardContent>
-        </Card>
+        </form>
       ) : (
         <>
-          <Card className="py-0">
-            <CardHeader className="gap-1 p-4">
-              <CardTitle>Conferir Gabarito</CardTitle>
-              <p className="text-sm text-muted-foreground">Marque a alternativa correta de cada questão.</p>
-            </CardHeader>
-          </Card>
+          <div>
+            <p className="font-medium">Conferir Gabarito</p>
+            <p className="text-sm text-muted-foreground">Marque a alternativa correta de cada questão.</p>
+          </div>
 
-          <Card className="overflow-visible py-0">
-            <CardContent className="space-y-6 p-4">
+          <div className="space-y-6">
               <div className="space-y-6">
                 {answerKey.map((ans, idx) => {
                   const altCount = form.getValues("alternativesPerQuestion");
@@ -792,8 +774,7 @@ function ExamCreatorForm({
                   );
                 })}
               </div>
-            </CardContent>
-          </Card>
+          </div>
         </>
       )}
     </div>
