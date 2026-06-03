@@ -35,6 +35,7 @@ import { queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useState } from "react";
 import type { Exam } from "@/types";
+import { ExamEditDialog } from "@/components/ExamEditDialog";
 
 interface ExamsTableProps {
   exams: Exam[];
@@ -46,6 +47,7 @@ interface ExamsTableProps {
 export function ExamsTable({ exams, statsByExamId, professorId, loading }: ExamsTableProps) {
   const navigate = useNavigate();
   const [deleteTarget, setDeleteTarget] = useState<Exam | null>(null);
+  const [editTarget, setEditTarget] = useState<Exam | null>(null);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -119,7 +121,7 @@ export function ExamsTable({ exams, statsByExamId, professorId, loading }: Exams
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger
-                      render={<Button variant="ghost" size="icon" className="h-8 w-8" />}
+                      render={<Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" />}
                     >
                       <MoreHorizontal className="h-4 w-4" />
                     </DropdownMenuTrigger>
@@ -128,7 +130,7 @@ export function ExamsTable({ exams, statsByExamId, professorId, loading }: Exams
                         <Eye className="h-4 w-4" />
                         Ver detalhes
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/exams/${exam.id}/edit`)}>
+                      <DropdownMenuItem onClick={() => setEditTarget(exam)}>
                         <Edit2 className="h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
@@ -180,6 +182,15 @@ export function ExamsTable({ exams, statsByExamId, professorId, loading }: Exams
           })}
         </TableBody>
       </Table>
+
+      {editTarget && (
+        <ExamEditDialog
+          exam={editTarget}
+          examId={editTarget.id}
+          open={!!editTarget}
+          onClose={() => setEditTarget(null)}
+        />
+      )}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>

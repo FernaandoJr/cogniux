@@ -21,7 +21,7 @@ import {
 const data = {
   navMain: [
     {
-      title: "Início",
+      title: "Dashboard",
       url: "/dashboard",
       icon: <LayoutDashboard />,
       isActive: true,

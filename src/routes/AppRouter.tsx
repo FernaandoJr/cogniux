@@ -7,15 +7,9 @@ import { Dashboard } from "@/components/Dashboard";
 import { ExamsPage } from "@/pages/ExamsPage";
 import { ExamCreatorPage } from "@/pages/ExamCreatorPage";
 import { ExamDetailPage } from "@/pages/ExamDetailPage";
-import { ProfilePageWrapper } from "@/pages/ProfilePageWrapper";
 import { OnlineExam } from "@/components/OnlineExam";
-import { ProfilePage } from "@/pages/ProfilePage";
 import { SeedPage } from "@/pages/SeedPage";
-import { useAuth } from "@/hooks/useAuth";
-
 export function AppRouter() {
-  const { user } = useAuth();
-
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
@@ -31,7 +25,6 @@ export function AppRouter() {
         <Route path="/exams/:id/edit" element={<ExamCreatorPage />} />
         <Route path="/exams/:id" element={<Navigate to="overview" replace />} />
         <Route path="/exams/:id/:tab" element={<ExamDetailPage />} />
-        <Route path="/profile" element={<ProfilePageWrapper />} />
 
         {/* Other protected pages use the landing navbar via ProfessorLayout */}
         <Route element={<ProfessorLayout />}>

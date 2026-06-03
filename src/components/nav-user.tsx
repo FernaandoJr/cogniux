@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -18,12 +19,14 @@ import {
 import { ChevronsUpDownIcon, LogOutIcon, Sun, Moon, User } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import { useTheme } from "@/hooks/useTheme"
+import { ProfileDialog } from "@/components/ProfileDialog"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
   const { user, logout } = useAuth()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
+  const [profileOpen, setProfileOpen] = useState(false)
 
   const avatarUrl =
     user?.photoURL ??
@@ -35,6 +38,7 @@ export function NavUser() {
   }
 
   return (
+    <>
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
@@ -75,7 +79,7 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <DropdownMenuItem onClick={() => setProfileOpen(true)}>
                 <User />
                 Perfil
               </DropdownMenuItem>
@@ -93,5 +97,7 @@ export function NavUser() {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
+    <ProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} />
+    </>
   )
 }
