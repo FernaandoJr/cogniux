@@ -299,12 +299,6 @@ export function Dashboard() {
   const topStudents     = useMemo(() => buildTopStudents(scores),                        [scores]);
   const heatmapCells    = useMemo(() => buildActivityHeatmap(dates),                     [dates]);
   const heatmapMax      = useMemo(() => Math.max(...heatmapCells.map((c) => c.count), 1), [heatmapCells]);
-  const heatmapWeeks    = useMemo(() => {
-    const weeks: HeatCell[][] = [];
-    for (let i = 0; i < heatmapCells.length; i += 7)
-      weeks.push(heatmapCells.slice(i, i + 7));
-    return weeks;
-  }, [heatmapCells]);
 
   const loading  = examsLoading || !scoresReady || !datesReady;
   const hasStats = scoresReady && scores.length > 0;
@@ -345,7 +339,7 @@ export function Dashboard() {
               <button
                 onClick={() => setStatsVisible((v) => {
                   const next = !v;
-                  try { localStorage.setItem("dashboard:statsVisible", String(next)); } catch {}
+                  try { localStorage.setItem("dashboard:statsVisible", String(next)); } catch { /* ignore */ }
                   return next;
                 })}
                 className="cursor-pointer select-none flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1"
