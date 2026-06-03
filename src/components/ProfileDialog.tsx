@@ -1,18 +1,20 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, User } from "lucide-react";
 import { updateProfile } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { auth } from "@/lib/firebase";
 import { toast } from "sonner";
 
-export function ProfilePage() {
+interface ProfileDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function ProfileDialog({ open, onClose }: ProfileDialogProps) {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [saving, setSaving] = useState(false);
 
@@ -24,6 +26,7 @@ export function ProfilePage() {
     try {
       await updateProfile(auth.currentUser, { displayName: displayName.trim() || null });
       toast.success("Perfil atualizado!");
+      onClose();
     } catch {
       toast.error("Erro ao atualizar perfil.");
     } finally {
@@ -31,51 +34,45 @@ export function ProfilePage() {
     }
   };
 
-  return (
-    <div className="max-w-md mx-auto space-y-6">
-      <Button variant="ghost" onClick={() => navigate(-1)}>
-        <ArrowLeft className="mr-2" size={18} /> Voltar
-      </Button>
+  const avatarUrl =
+    user.photoURL ??
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName ?? "P")}&background=random&size=96`;
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User size={20} /> Perfil
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Perfil</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
           <div className="flex justify-center">
             <img
-              src={
-                user.photoURL ??
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName ?? "P")}&background=random&size=96`
-              }
-              className="w-24 h-24 rounded-full border-2 border-border"
+              src={avatarUrl}
+              className="w-20 h-20 rounded-full border-2 border-border"
               alt=""
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input id="email" value={user.email ?? ""} disabled />
+            <Label htmlFor="profile-email">E-mail</Label>
+            <Input id="profile-email" value={user.email ?? ""} disabled />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="displayName">Nome</Label>
+            <Label htmlFor="profile-name">Nome</Label>
             <Input
-              id="displayName"
+              id="profile-name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Seu nome"
             />
           </div>
-
-          <Button className="w-full" onClick={handleSave} disabled={saving}>
-            <Save className="mr-2" size={16} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
             Salvar
           </Button>
-        </CardContent>
-      </Card>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

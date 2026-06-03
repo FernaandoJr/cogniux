@@ -12,6 +12,7 @@ import {
   Loader2,
   Key,
   Copy,
+  Check,
   PlusCircle,
   MoreHorizontal,
   Printer,
@@ -20,7 +21,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -45,7 +45,7 @@ import { calculateExamStats } from "@/lib/examStats";
 import { getScoreColorClass, calculateScore, getAlternatives } from "@/lib/grading";
 import { submissionsToCsv, downloadCsv } from "@/lib/export";
 import { useExamDetail } from "@/hooks/useExamDetail";
-
+import { ExamEditDialog } from "@/components/ExamEditDialog";
 import { ExamPrintView, useSubmissionPrint } from "@/components/ExamPrintView";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -62,6 +62,8 @@ export function ExamDetail() {
   const [studentToDelete, setStudentToDelete] = useState<{ id: string; name: string } | null>(null);
   const [answerKeyVisible, setAnswerKeyVisible] = useState(false);
   const [submissionToPrint, setSubmissionToPrint] = useState<typeof submissions[number] | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   const handleCopyToken = (token: string) => {
     navigator.clipboard.writeText(token);
@@ -84,7 +86,24 @@ export function ExamDetail() {
   }, [submissionToPrint]);
 
   if (!examId) return null;
-  if (loading && !exam) return <Skeleton className="h-64 w-full" />;
+  if (loading && !exam) return (
+    <div className="space-y-6">
+      <div className="pb-4 border-b space-y-3">
+        <Skeleton className="h-7 w-64" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+      <div className="flex gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-24 rounded-md" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
   if (!exam) return <p className="text-center p-8">Prova não encontrada.</p>;
 
   const stats = calculateExamStats(submissions);
@@ -188,12 +207,12 @@ export function ExamDetail() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+        <Button variant="ghost" className="cursor-pointer" onClick={() => navigate("/exams")}>
           <ArrowLeft className="mr-2" size={18} /> Voltar
         </Button>
         <AlertDialog>
           <AlertDialogTrigger>
-            <Button variant="destructive" size="sm">
+            <Button variant="destructive" size="sm" className="cursor-pointer">
               <Trash2 size={16} />
               Remover
             </Button>
@@ -211,17 +230,17 @@ export function ExamDetail() {
         </AlertDialog>
       </div>
 
-      <Card>
-        <CardHeader className="border-b">
+      <div>
+        <div className="pb-4 border-b mb-4">
           <div className="flex flex-col md:flex-row justify-between gap-2">
             <div>
-              <CardTitle className="text-2xl flex items-center gap-1 group/edit">
+              <h2 className="text-2xl font-semibold flex items-center gap-1 group/edit">
                 <span className="group-hover/edit:underline">{exam.subject}</span>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => navigate(`/exam/${examId}/edit`)} aria-label="Editar">
+                <Button variant="ghost" size="icon" className="h-7 w-7 cursor-pointer" onClick={() => setEditDialogOpen(true)} aria-label="Editar">
                   <Edit2 size={15} />
                 </Button>
-              </CardTitle>
-              <CardDescription>{exam.semester}</CardDescription>
+              </h2>
+              <p className="text-sm text-muted-foreground">{exam.semester}</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-center">
@@ -236,9 +255,9 @@ export function ExamDetail() {
               </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="">
-          <Tabs value={activeTab} onValueChange={(val) => navigate(`/exam/${examId}/${val}`)}>
+        </div>
+        <div>
+          <Tabs value={activeTab} onValueChange={(val) => navigate(`/exams/${examId}/${val}`)}>
             <div className="overflow-x-auto overflow-y-hidden pb-2">
               <TabsList className="gap-1 w-max" variant={"line"}>
                 <TabsTrigger value="overview">Resumo</TabsTrigger>
@@ -249,23 +268,59 @@ export function ExamDetail() {
             </div>
 
             <TabsContent value="overview" className="mt-4 space-y-4">
-              <div className="flex justify-between gap-4">
-                <div className="space-y-1">
-                  {exam.course && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Curso:</span> {exam.course}
-                    </p>
-                  )}
-                  {exam.className && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Turma:</span> {exam.className}
-                    </p>
-                  )}
-                  {exam.unit && (
-                    <p className="text-sm">
-                      <span className="text-muted-foreground">Unidade:</span> {exam.unit}
-                    </p>
-                  )}
+              <div className="space-y-1">
+                {exam.course && (
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Curso:</span> {exam.course}
+                  </p>
+                )}
+                {exam.className && (
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Turma:</span> {exam.className}
+                  </p>
+                )}
+                {exam.unit && (
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Unidade:</span> {exam.unit}
+                  </p>
+                )}
+              </div>
+              <div className="flex justify-between gap-6">
+                <div>
+                  <div className="flex items-center gap-1 mb-3">
+                    <h4 className="font-medium">Gabarito Oficial</h4>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 cursor-pointer"
+                      onClick={() => setAnswerKeyVisible((v) => !v)}
+                      aria-label={answerKeyVisible ? "Ocultar gabarito" : "Revelar gabarito"}
+                    >
+                      {answerKeyVisible ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </Button>
+                  </div>
+                  <div className="flex flex-col gap-1.5 select-none">
+                    {exam.answerKey.map((ans, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground w-5 text-center shrink-0">{i + 1}</span>
+                        <div className="flex items-center gap-1">
+                          {getAlternatives(exam.alternativesPerQuestion).map((alt) => (
+                            <span
+                              key={alt}
+                              className={cn(
+                                "w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center border transition-all duration-200",
+                                answerKeyVisible && ans === alt
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "text-muted-foreground border-border"
+                              )}
+                            >
+                              {alt}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex flex-col items-center gap-2 shrink-0">
                   <QRCodeSVG
@@ -277,50 +332,19 @@ export function ExamDetail() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 text-xs"
-                    onClick={() => { navigator.clipboard.writeText(exam.id); toast.success("Copiado!"); }}
+                    className="h-7 text-xs cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard.writeText(exam.id);
+                      setCodeCopied(true);
+                      setTimeout(() => setCodeCopied(false), 1000);
+                    }}
                   >
-                    <Copy size={13} className="mr-1" /> Copiar código
+                    {codeCopied ? <Check size={13} className="mr-1" /> : <Copy size={13} className="mr-1" />}
+                    {codeCopied ? "Copiado!" : "Copiar código"}
                   </Button>
+                  <ExamPrintView exam={exam} students={students} />
                 </div>
               </div>
-              <div>
-                <div className="flex items-center gap-1 mb-3">
-                  <h4 className="font-medium">Gabarito Oficial</h4>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => setAnswerKeyVisible((v) => !v)}
-                    aria-label={answerKeyVisible ? "Ocultar gabarito" : "Revelar gabarito"}
-                  >
-                    {answerKeyVisible ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </Button>
-                </div>
-                <div className="grid grid-flow-col gap-x-6 gap-y-1.5 select-none" style={{ gridTemplateRows: `repeat(${Math.ceil(exam.answerKey.length / 3)}, auto)` }}>
-                  {exam.answerKey.map((ans, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground w-5 text-center shrink-0">{i + 1}</span>
-                      <div className="flex items-center gap-1">
-                        {getAlternatives(exam.alternativesPerQuestion).map((alt) => (
-                          <span
-                            key={alt}
-                            className={cn(
-                              "w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center border transition-all duration-200",
-                              answerKeyVisible && ans === alt
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "text-muted-foreground border-border"
-                            )}
-                          >
-                            {alt}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <ExamPrintView exam={exam} students={students} />
             </TabsContent>
 
             <TabsContent value="students" className="mt-6 space-y-4">
@@ -591,9 +615,15 @@ export function ExamDetail() {
             </TabsContent>
 
           </Tabs>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       {printSubmissionNode}
+      <ExamEditDialog
+        exam={exam}
+        examId={examId}
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+      />
     </div>
   );
 }

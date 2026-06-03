@@ -91,6 +91,16 @@ function generateStudents(n: number): string[] {
   return Array.from({ length: n }, () => randomName(used));
 }
 
+// Pool de alunos por turma — mesmos alunos aparecem em múltiplas provas da mesma classe
+const classStudentPool = new Map<string, string[]>();
+
+function getClassStudents(className: string, n: number): string[] {
+  if (!classStudentPool.has(className)) {
+    classStudentPool.set(className, generateStudents(Math.max(n, 45)));
+  }
+  return classStudentPool.get(className)!;
+}
+
 const EXAMS = [
   // ── ADS 2025.1 ──────────────────────────────────────────────────────────────
   { subject: "Algoritmos e Estrutura de Dados", course: "Análise e Desenvolvimento de Sistemas", className: "ADS-3A", unit: "I",   semester: "2025.1", numQuestions: 10, alternativesPerQuestion: 5, isOnline: true,  numStudents: 38, avgScore: 7.2, createdDaysAgo: 80  },
@@ -149,6 +159,7 @@ async function cleanExams(uid: string, push: (m: string) => void) {
 // ── Seed ─────────────────────────────────────────────────────────────────────
 
 async function seedExams(uid: string, push: (m: string) => void) {
+  classStudentPool.clear();
   push("🌱 Criando novas provas…");
   for (const def of EXAMS) {
     const answerKey = generateAnswerKey(def.numQuestions, def.alternativesPerQuestion);
@@ -167,7 +178,7 @@ async function seedExams(uid: string, push: (m: string) => void) {
       createdAt: daysAgo(def.createdDaysAgo),
     });
 
-    const students = generateStudents(def.numStudents);
+    const students = getClassStudents(def.className, def.numStudents).slice(0, def.numStudents);
 
     for (const name of students) {
       await addDoc(collection(db, "exams", examRef.id, "students"), {
@@ -186,8 +197,8 @@ async function seedExams(uid: string, push: (m: string) => void) {
     const submitters = students.slice(0, Math.floor(students.length * submissionRate));
 
     for (const name of submitters) {
-      const noise = Math.random() * 2.5 - 1.25;
-      const answers = generateAnswers(answerKey, def.avgScore + noise, def.alternativesPerQuestion);
+      const noise = (Math.random() * 2 - 1) * (2 + Math.random() * 2);
+      const answers = generateAnswers(answerKey, Math.min(9.5, def.avgScore + noise), def.alternativesPerQuestion);
       const score = calculateScore(answers, answerKey);
       await addDoc(collection(db, "exams", examRef.id, "submissions"), {
         studentName: name,

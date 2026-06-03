@@ -17,11 +17,25 @@ function PrintSheet({ exam, student }: { exam: Exam; student: Pick<Student, "id"
   const half = Math.ceil(exam.numQuestions / 2);
   return (
     <div style={{ pageBreakAfter: "always", padding: 48 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid black", paddingBottom: 24, marginBottom: 24 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          borderBottom: "2px solid black",
+          paddingBottom: 24,
+          marginBottom: 24,
+        }}
+      >
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 900, textTransform: "uppercase", margin: 0 }}>Gabarito</h1>
-          {student.name && <p style={{ marginTop: 16 }}><strong>ALUNO:</strong> {student.name}</p>}
-          <p><strong>MATÉRIA:</strong> {exam.subject}</p>
+          {student.name && (
+            <p style={{ marginTop: 16 }}>
+              <strong>ALUNO:</strong> {student.name}
+            </p>
+          )}
+          <p>
+            <strong>MATÉRIA:</strong> {exam.subject}
+          </p>
         </div>
         <QRCodeSVG
           value={JSON.stringify({ examId: exam.id, studentName: student.name, num: exam.numQuestions })}
@@ -38,9 +52,29 @@ function PrintSheet({ exam, student }: { exam: Exam; student: Pick<Student, "id"
               return (
                 <div key={qNum} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <span style={{ width: 24, textAlign: "right", fontWeight: 700 }}>{qNum}</span>
-                  <div style={{ flex: 1, display: "flex", justifyContent: "space-between", border: "2px solid black", borderRadius: 9999, padding: "8px 16px" }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      border: "2px solid black",
+                      borderRadius: 9999,
+                      padding: "8px 16px",
+                    }}
+                  >
                     {ALPHABET.slice(0, exam.alternativesPerQuestion).map((l) => (
-                      <div key={l} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid #9ca3af", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div
+                        key={l}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          borderRadius: "50%",
+                          border: "1px solid #9ca3af",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
                         <span style={{ fontSize: 10, fontWeight: 700 }}>{l}</span>
                       </div>
                     ))}
@@ -56,9 +90,7 @@ function PrintSheet({ exam, student }: { exam: Exam; student: Pick<Student, "id"
 }
 
 function PrintDocument({ exam, students, mode }: ExamPrintViewProps) {
-  const list = mode === "students" && students.length > 0
-    ? students
-    : [{ id: "generic", name: "" } as Student];
+  const list = mode === "students" && students.length > 0 ? students : [{ id: "generic", name: "" } as Student];
 
   return (
     <div style={{ background: "white", color: "black", padding: 16 }}>
@@ -73,12 +105,26 @@ function SubmissionPrintDocument({ exam, submission }: { exam: Exam; submission:
   const half = Math.ceil(exam.numQuestions / 2);
   return (
     <div style={{ background: "white", color: "black", padding: 48 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "2px solid black", paddingBottom: 24, marginBottom: 24 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          borderBottom: "2px solid black",
+          paddingBottom: 24,
+          marginBottom: 24,
+        }}
+      >
         <div>
           <h1 style={{ fontSize: 28, fontWeight: 900, textTransform: "uppercase", margin: 0 }}>Gabarito</h1>
-          <p style={{ marginTop: 16 }}><strong>ALUNO:</strong> {submission.studentName}</p>
-          <p><strong>MATÉRIA:</strong> {exam.subject}</p>
-          <p><strong>NOTA:</strong> {submission.score.toFixed(1)}</p>
+          <p style={{ marginTop: 16 }}>
+            <strong>ALUNO:</strong> {submission.studentName}
+          </p>
+          <p>
+            <strong>MATÉRIA:</strong> {exam.subject}
+          </p>
+          <p>
+            <strong>NOTA:</strong> {submission.score.toFixed(1)}
+          </p>
         </div>
         <QRCodeSVG
           value={JSON.stringify({ examId: exam.id, studentName: submission.studentName })}
@@ -97,16 +143,37 @@ function SubmissionPrintDocument({ exam, submission }: { exam: Exam; submission:
               return (
                 <div key={qNum} style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <span style={{ width: 24, textAlign: "right", fontWeight: 700 }}>{qNum}</span>
-                  <div style={{ flex: 1, display: "flex", justifyContent: "space-between", border: "2px solid black", borderRadius: 9999, padding: "8px 16px" }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      border: "2px solid black",
+                      borderRadius: 9999,
+                      padding: "8px 16px",
+                    }}
+                  >
                     {ALPHABET.slice(0, exam.alternativesPerQuestion).map((l) => {
                       const isSelected = studentAnswer === l;
                       const isCorrect = correctAnswer === l;
-                      const bg = isSelected
-                        ? isCorrect ? "#16a34a" : "#dc2626"
-                        : "transparent";
+                      const bg = isSelected ? (isCorrect ? "#16a34a" : "#dc2626") : "transparent";
                       return (
-                        <div key={l} style={{ width: 24, height: 24, borderRadius: "50%", border: "1px solid #9ca3af", display: "flex", alignItems: "center", justifyContent: "center", background: bg }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, color: isSelected ? "white" : "black" }}>{l}</span>
+                        <div
+                          key={l}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: "50%",
+                            border: "1px solid #9ca3af",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: bg,
+                          }}
+                        >
+                          <span style={{ fontSize: 10, fontWeight: 700, color: isSelected ? "white" : "black" }}>
+                            {l}
+                          </span>
                         </div>
                       );
                     })}
@@ -124,13 +191,14 @@ function SubmissionPrintDocument({ exam, submission }: { exam: Exam; submission:
 export function useSubmissionPrint(exam: Exam | null, submission: Submission | null) {
   const ref = useRef<HTMLDivElement>(null);
   const print = useReactToPrint({ contentRef: ref });
-  const node = exam && submission ? (
-    <div style={{ display: "none" }}>
-      <div ref={ref}>
-        <SubmissionPrintDocument exam={exam} submission={submission} />
+  const node =
+    exam && submission ? (
+      <div style={{ display: "none" }}>
+        <div ref={ref}>
+          <SubmissionPrintDocument exam={exam} submission={submission} />
+        </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
   return { print, node };
 }
 
@@ -143,11 +211,11 @@ export function ExamPrintView({ exam, students }: { exam: Exam; students: Studen
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant="outline" onClick={() => printGeneric()}>
+      <div className="flex flex-wrap gap-2 flex-col">
+        <Button size="sm" variant="outline" className="cursor-pointer" onClick={() => printGeneric()}>
           <Printer size={14} /> Imprimir
         </Button>
-        <Button size="sm" variant="outline" disabled={students.length === 0} onClick={() => printStudents()}>
+        <Button size="sm" variant="outline" className="cursor-pointer" disabled={students.length === 0} onClick={() => printStudents()}>
           <Printer size={14} /> Imprimir por Aluno
         </Button>
       </div>

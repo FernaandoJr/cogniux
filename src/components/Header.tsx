@@ -36,7 +36,7 @@ export function Header({ user }: HeaderProps) {
 
         <nav className="flex items-center gap-1">
           {navLink("/dashboard", "Início")}
-          {navLink("/exam/create", "Nova Prova")}
+          {navLink("/exams/create", "Nova Prova")}
 
           <Separator orientation="vertical" className="mx-2 h-6 !self-center" />
 
