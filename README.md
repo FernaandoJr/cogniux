@@ -1,43 +1,92 @@
-# Cogniux
+<div align="center">
+  <h1>Cogniux</h1>
+  <p>Plataforma de avaliação pedagógica com correção automática e análise por IA.</p>
 
-Plataforma web para professores criarem e gerenciarem provas com correção automática, portal online para alunos responderem e análise de desempenho por IA.
+  ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white&style=flat-square)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178c6?logo=typescript&logoColor=white&style=flat-square)
+  ![Firebase](https://img.shields.io/badge/Firebase-12-ffca28?logo=firebase&logoColor=black&style=flat-square)
+  ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=white&style=flat-square)
+  ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06b6d4?logo=tailwindcss&logoColor=white&style=flat-square)
+</div>
+
+---
+
+## Sobre
+
+Cogniux é uma plataforma web voltada para professores criarem, aplicarem e analisarem provas com correção automática. Alunos acessam as atividades por um portal público, sem necessidade de cadastro. Resultados são analisados por IA com recomendações pedagógicas.
+
+## Funcionalidades
+
+- **Criação de provas** com gabarito manual ou gerado por IA a partir de tema e arquivos (PDF/imagem)
+- **Portal do aluno** com acesso por código único ou token individual por aluno
+- **Correção automática** no envio — nota calculada instantaneamente
+- **Dashboard analítico** com gráficos de distribuição de notas, aprovação, evolução mensal e ranking de alunos
+- **Gabarito oficial** com toggle de visibilidade e impressão de folhas de resposta em branco ou preenchidas por aluno
+- **Plano pedagógico** gerado por IA com análise da turma e recomendações práticas
+- **Exportação CSV** de notas por prova
+- **QR Code** de acesso direto para cada prova
+- **Temas** claro, escuro e sistema
 
 ---
 
 ## Stack
 
-- **React 19** + TypeScript + Vite
-- **Firebase** — Auth (Google) e Firestore
-- **Google Gemini** — geração de questões, gabaritos e planos pedagógicos
-- **Tailwind CSS** + shadcn/ui
-- **TanStack Query** — cache e sincronização de dados
-- **react-to-print** — impressão de gabaritos e folhas de resposta
-- **recharts** — gráficos do dashboard
+| Camada | Tecnologia |
+|---|---|
+| Frontend | React 19, TypeScript, Vite |
+| Estilização | Tailwind CSS v4, shadcn/ui (Base UI), Geist |
+| Roteamento | React Router v7 |
+| Estado / Cache | TanStack Query v5 |
+| Formulários | React Hook Form + Zod |
+| Backend / DB | Firebase Firestore |
+| Auth | Firebase Authentication (Google) |
+| IA | Google Gemini 2.0 Flash (`@google/genai`) |
+| Gráficos | Recharts |
+| Impressão | react-to-print |
+| Testes | Vitest |
 
 ---
 
-## Rodando localmente
+## Início Rápido
 
 ### Pré-requisitos
 
-- Node.js 20+
+- **Node.js 20+**
 - Projeto no [Firebase Console](https://console.firebase.google.com) com **Authentication** (provedor Google) e **Firestore** habilitados
 - Chave de API do [Google AI Studio](https://aistudio.google.com)
 
-### 1. Clone e instale
+### Instalação
 
 ```bash
-git clone https://github.com/seu-usuario/cogniux.git
+# 1. Clone o repositório
+git clone https://github.com/FernaandoJr/cogniux.git
 cd cogniux
+
+# 2. Instale as dependências
 npm install
+
+# 3. Configure as variáveis de ambiente
+cp .env.example .env.local
+# edite .env.local com suas credenciais
+
+# 4. Aplique as regras do Firestore
+npm run deploy:firestore-rules
+
+# 5. Inicie o servidor de desenvolvimento
+npm run dev
 ```
 
-### 2. Variáveis de ambiente
+Acesse `http://localhost:3000`.
 
-Crie o arquivo `.env.local` na raiz do projeto:
+---
+
+## Variáveis de Ambiente
+
+Crie `.env.local` na raiz do projeto. Todas as variáveis `VITE_` são obrigatórias — a aplicação lança erro na inicialização se alguma estiver ausente.
 
 ```env
-# Firebase — encontre em: Firebase Console > Configurações do projeto > Seus apps
+# ─── Firebase ────────────────────────────────────────────────────────────────
+# Firebase Console → Configurações do projeto → Seus apps
 VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
 VITE_FIREBASE_PROJECT_ID=
@@ -47,102 +96,44 @@ VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=         # opcional
 VITE_FIREBASE_FIRESTORE_DATABASE_ID=  # use (default) se não criou um banco nomeado
 
-# Gemini — encontre em: aistudio.google.com > Get API Key
+# ─── Google Gemini ────────────────────────────────────────────────────────────
+# aistudio.google.com → Get API Key
 GEMINI_API_KEY=
 ```
 
-> `VITE_` prefixed vars são expostas ao browser. `GEMINI_API_KEY` é lida tanto pelo Vite quanto pelo Node (scripts de seed).
-
-Se qualquer variável obrigatória estiver ausente, a aplicação lança erro na inicialização informando o nome da variável faltante.
-
-### 3. Regras do Firestore
-
-Aplique as regras de segurança no seu projeto via Firebase CLI:
-
-```bash
-npx firebase login
-npx firebase use --add   # selecione seu projeto
-npm run deploy:firestore-rules
-```
-
-Ou copie manualmente o conteúdo de `firestore.rules` no console do Firebase em **Firestore > Regras**.
-
-### 4. Inicie o servidor
-
-```bash
-npm run dev
-```
-
-Acesse `http://localhost:3000`.
+> [!WARNING]
+> `GEMINI_API_KEY` é injetada no bundle via Vite e fica exposta no client. Para um deploy público, mova as chamadas à API Gemini para um backend ou Cloud Function.
 
 ---
 
-## Estrutura de dados (Firestore)
+## Estrutura do Projeto
 
 ```
-exams/{examId}
-  subject, course, className, unit, semester
-  numQuestions, alternativesPerQuestion
-  answerKey: string[]
-  questions?: { text, options[], correctAnswer }[]
-  isOnline: boolean
-  professorId: string
-  createdAt, updatedAt
-
-  /submissions/{subId}
-    studentName, answers[], score, gradedAt, isOnline, accessToken
-
-  /students/{studentId}
-    name, registrationId, createdAt
-
-  /plans/{planId}
-    analysis, recommendations[], createdAt
-
-access_tokens/{token}
-  examId, studentName, isUsed, createdAt, usedAt
+cogniux/
+├── src/
+│   ├── components/
+│   │   ├── ui/                  # Componentes base (shadcn/ui)
+│   │   ├── dashboard/           # Cards e tabela do dashboard
+│   │   ├── landing/             # Hero, Navbar e seções da landing
+│   │   ├── ExamCreator.tsx      # Formulário de criação/edição de provas
+│   │   ├── ExamDetail.tsx       # Página de detalhes com abas
+│   │   ├── ExamEditDialog.tsx   # Modal de edição rápida de prova
+│   │   ├── ExamPrintView.tsx    # Layout de impressão de gabaritos
+│   │   ├── Dashboard.tsx        # Painel analítico
+│   │   ├── OnlineExam.tsx       # Interface de prova online do aluno
+│   │   ├── ProfileDialog.tsx    # Modal de perfil do professor
+│   │   └── StudentPortal.tsx    # Portal público do aluno
+│   ├── hooks/                   # Custom hooks (useAuth, useExams, useTheme…)
+│   ├── lib/                     # Utilitários, Firebase, queries, schemas
+│   ├── pages/                   # Páginas roteadas
+│   ├── routes/                  # AppRouter, ProtectedRoute, layouts
+│   ├── services/                # Integração Gemini (prompts + chamadas)
+│   └── types/                   # Interfaces globais (Exam, Student, Submission…)
+├── scripts/                     # Scripts Node para Firestore (regras, seed)
+├── firestore.rules              # Regras de segurança do Firestore
+├── firestore.indexes.json       # Índices compostos do Firestore
+└── vite.config.ts
 ```
-
----
-
-## Fluxo do professor
-
-1. Acessa `/portal` e clica em **Entrar com Google**.
-2. É redirecionado ao **Dashboard** com gráficos de distribuição de notas, aprovados/reprovados, participação geral, média por curso e evolução mensal.
-3. **Nova Prova** — preenche matéria, curso, turma, unidade, semestre, quantidade de questões e tipo (online/presencial). Pode:
-   - Inserir o gabarito manualmente letra por letra
-   - Usar IA para gerar as questões e o gabarito a partir de um tema (aceita upload de PDF ou imagem como contexto)
-4. Na página de detalhes da prova há quatro abas:
-   - **Resumo** — informações gerais, QR code e link de acesso direto, botões de impressão (folha em branco ou gabarito por aluno), gabarito oficial com toggle de visibilidade
-   - **Alunos** — cadastro manual da lista de alunos; geração de tokens de acesso individuais (um por aluno)
-   - **Respostas** — tabela de submissions com nota por aluno, filtro por tipo de entrega, exportação CSV, impressão individual
-   - **Plano Pedagógico** — análise da turma gerada pela IA com base nas notas, com recomendações práticas para o professor
-5. **Perfil** (`/profile`) — edição do nome de exibição da conta Google.
-
----
-
-## Fluxo do aluno
-
-1. Acessa `/portal` sem precisar de login.
-2. Insere o código de acesso fornecido pelo professor. Pode ser:
-   - O **ID da prova** diretamente — qualquer pessoa com o ID pode responder
-   - Um **token individual** gerado pelo professor para um aluno específico — uso único, marcado como usado ao finalizar
-3. Informa o nome completo e inicia a prova.
-4. Responde as questões uma por uma. Navegação por botões ou teclado (`←` `→`). Barra de progresso mostra o andamento.
-5. Ao clicar em **Finalizar**, as respostas são salvas no Firestore e a nota calculada automaticamente.
-6. Tela de confirmação e retorno ao portal.
-
----
-
-## IA (Google Gemini)
-
-Todas as chamadas usam `gemini-2.0-flash` com schema JSON estruturado e retry automático (3 tentativas, backoff de 1 s, timeout de 30 s).
-
-| Função | Onde é usada | Entrada | Saída |
-|---|---|---|---|
-| Gerar questões | ExamCreator | matéria, tópico, qtd, dificuldade, arquivos opcionais | `{ text, options[], correctAnswer }[]` |
-| Gerar gabarito | ExamCreator | matéria, tópico, qtd, arquivos opcionais | `string[]` |
-| Plano pedagógico | ExamDetail > aba Plano | matéria + estatísticas da turma | `{ analysis, recommendations[] }` |
-| Corrigir resposta | ExamDetail | questão, resposta do aluno, rubrica | `{ score, analysis, feedback, corrections }` |
 
 ---
 
@@ -150,35 +141,86 @@ Todas as chamadas usam `gemini-2.0-flash` com schema JSON estruturado e retry au
 
 | Rota | Acesso | Descrição |
 |---|---|---|
-| `/portal` | público | Portal do aluno e login do professor |
+| `/` | público | Landing page |
+| `/auth` | público | Portal do aluno e login do professor |
 | `/online/:examId` | público | Prova online |
 | `/dashboard` | professor | Painel com visão geral |
-| `/exam/create` | professor | Criação de prova |
-| `/exam/:id/edit` | professor | Edição de prova |
-| `/exam/:id/:tab` | professor | Detalhes da prova (resumo, alunos, respostas, plano) |
-| `/profile` | professor | Edição de perfil |
-| `/seed` | professor | Popular banco com dados de exemplo |
+| `/exams` | professor | Lista de provas |
+| `/exams/create` | professor | Criação de prova |
+| `/exams/:id/edit` | professor | Edição completa de prova |
+| `/exams/:id/:tab` | professor | Detalhes da prova (resumo · alunos · notas · plano) |
+| `/seed` | professor | Popular banco com dados fictícios |
+
+---
+
+## Modelo de Dados (Firestore)
+
+```
+exams/{examId}
+  ├── subject, course, className, unit, semester
+  ├── numQuestions, alternativesPerQuestion
+  ├── answerKey: string[]
+  ├── questions?: { text, options[], correctAnswer }[]
+  ├── isOnline: boolean
+  ├── professorId: string
+  ├── createdAt, updatedAt
+  │
+  ├── submissions/{subId}
+  │     studentName, answers[], score, gradedAt, isOnline, accessToken
+  │
+  ├── students/{studentId}
+  │     name, registrationId, createdAt
+  │
+  └── plans/{planId}
+        analysis, recommendations[], createdAt
+
+access_tokens/{token}
+  examId, studentName, isUsed, createdAt, usedAt
+```
+
+---
+
+## Integração com IA
+
+Todas as chamadas usam `gemini-2.0-flash` com schema JSON estruturado e retry automático (3 tentativas, backoff de 1 s, timeout de 30 s).
+
+| Função | Entrada | Saída |
+|---|---|---|
+| Gerar questões | matéria, tópico, quantidade, arquivos opcionais | `{ text, options[], correctAnswer }[]` |
+| Gerar gabarito | matéria, tópico, quantidade, arquivos opcionais | `string[]` |
+| Plano pedagógico | matéria + estatísticas da turma | `{ analysis, recommendations[] }` |
 
 ---
 
 ## Scripts
 
 ```bash
-npm run dev            # servidor de desenvolvimento (porta 3000)
-npm run build          # type-check + build de produção
-npm run test           # testes unitários em modo watch
-npm run test:run       # testes unitários (CI)
-npm run test:coverage  # cobertura de código
-npm run lint           # eslint + tsc
-npm run format         # prettier
-npm run check:firestore          # verifica conexão com Firestore
-npm run deploy:firestore-rules   # publica as regras de segurança
+npm run dev                       # servidor de desenvolvimento (porta 3000)
+npm run build                     # type-check + build de produção
+npm run preview                   # pré-visualização do build
+
+npm run lint                      # ESLint + tsc
+npm run format                    # Prettier
+
+npm run test                      # testes unitários em modo watch
+npm run test:run                  # testes unitários (CI)
+npm run test:coverage             # relatório de cobertura
+
+npm run check:firestore           # verifica conexão com Firestore
+npm run deploy:firestore-rules    # publica regras de segurança
+npm run deploy:firestore-indexes  # publica índices compostos
+npm run deploy:firestore          # publica regras + índices
 ```
 
 ---
 
-## Observações
+## Segurança
 
-- A chave do Gemini é injetada no bundle via Vite. Para produção pública, mova as chamadas para um backend ou Cloud Function.
-- As regras do Firestore estão em `firestore.rules`. Revise antes de qualquer deploy público.
-- Para dados de exemplo durante desenvolvimento, acesse `/seed` autenticado como professor — a página limpa e reinserere um conjunto de provas, alunos e notas fictícias.
+- As regras do Firestore (`firestore.rules`) garantem que professores acessem apenas seus próprios dados e que alunos só consigam criar submissions com token válido. Revise antes de qualquer deploy público.
+- Para dados de exemplo em desenvolvimento, acesse `/seed` autenticado como professor — a página limpa e recria um conjunto de provas, alunos e notas fictícias.
+
+---
+
+## Licença
+
+Distribuído sob a licença MIT. Veja [`LICENSE`](LICENSE) para mais informações.
