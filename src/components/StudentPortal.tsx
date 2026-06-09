@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BrainCircuit, ArrowRight, Sun, Moon } from "lucide-react";
-import { GoogleIcon, GithubIcon } from "@/components/icons/BrandIcons";
+import { GoogleIcon } from "@/components/icons/BrandIcons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ export function StudentPortal() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, loginWithGithub, loginAnonymously } = useAuth();
+  const { login, loginAnonymously } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const handleEnterExam = async () => {
@@ -63,14 +63,6 @@ export function StudentPortal() {
     }
   };
 
-  const handleGithubLogin = async () => {
-    try {
-      await loginWithGithub();
-      navigate("/dashboard");
-    } catch {
-      toast.error("Falha na autenticação com GitHub.");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center relative">
@@ -122,16 +114,10 @@ export function StudentPortal() {
             <p className="text-xs text-muted-foreground uppercase tracking-widest font-medium">
               Acesso do Professor
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="w-full" onClick={handleProfessorLogin}>
-                <GoogleIcon className="mr-2 w-4 h-4" />
-                Google
-              </Button>
-              <Button variant="outline" className="w-full" onClick={handleGithubLogin}>
-                <GithubIcon className="mr-2 w-4 h-4 text-foreground" />
-                GitHub
-              </Button>
-            </div>
+            <Button variant="outline" className="w-full" onClick={handleProfessorLogin}>
+              <GoogleIcon className="mr-2 w-4 h-4" />
+              Google
+            </Button>
             <Button variant="ghost" className="w-full text-muted-foreground" onClick={handleAnonymousLogin}>
               Continuar sem conta
             </Button>

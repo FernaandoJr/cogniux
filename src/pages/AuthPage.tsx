@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { GoogleIcon, GithubIcon } from "@/components/icons/BrandIcons";
+import { GoogleIcon } from "@/components/icons/BrandIcons";
 import { useAuth } from "@/hooks/useAuth";
 import { normalizeAccessCode } from "@/lib/accessCode";
 import { db } from "@/lib/firebase";
@@ -35,7 +35,7 @@ export function AuthPage() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, login, loginWithGithub, loginAnonymously } = useAuth();
+  const { user, login, loginAnonymously } = useAuth();
   const isDark = useIsDark();
 
   useEffect(() => {
@@ -74,15 +74,7 @@ export function AuthPage() {
     }
   };
 
-  const handleGithubLogin = async () => {
-    try {
-      await loginWithGithub();
-    } catch {
-      toast.error("Falha na autenticação com GitHub.");
-    }
-  };
-
-  const handleAnonymousLogin = async () => {
+const handleAnonymousLogin = async () => {
     try {
       await loginAnonymously();
       navigate("/dashboard");
@@ -94,7 +86,7 @@ export function AuthPage() {
   return (
     <>
       <LandingNavbar disableSticky forceBlur />
-      <div className="flex h-[calc(100dvh-3.5rem)] w-full overflow-hidden">
+      <div className="flex h-[calc(100dvh-3.5rem)] w-full overflow-hidden bg-white dark:bg-black">
         {/* Form panel */}
         <div className="flex flex-1 items-center justify-center overflow-y-auto p-8">
           <div className="w-full max-w-md space-y-8">
@@ -130,7 +122,7 @@ export function AuthPage() {
 
             <div className="relative">
               <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-3 text-xs text-muted-foreground uppercase tracking-widest">
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black px-3 text-xs text-muted-foreground uppercase tracking-widest">
                 Professor
               </span>
             </div>
@@ -140,16 +132,10 @@ export function AuthPage() {
               <p className="text-sm text-muted-foreground">
                 Acesse sua conta para criar e gerenciar avaliações.
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="w-full" onClick={handleProfessorLogin}>
-                  <GoogleIcon className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
-                <Button variant="outline" className="w-full" onClick={handleGithubLogin}>
-                  <GithubIcon className="mr-2 h-4 w-4 text-foreground" />
-                  GitHub
-                </Button>
-              </div>
+              <Button variant="outline" className="w-full" onClick={handleProfessorLogin}>
+                <GoogleIcon className="mr-2 h-4 w-4" />
+                Google
+              </Button>
               <Button
                 variant="ghost"
                 className="w-full text-muted-foreground"
