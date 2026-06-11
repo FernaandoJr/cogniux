@@ -49,7 +49,8 @@ export function StudentPortal() {
     try {
       await login();
       navigate("/dashboard");
-    } catch {
+    } catch (e) {
+      console.error("Google auth error:", e);
       toast.error("Falha na autenticação com Google.");
     }
   };

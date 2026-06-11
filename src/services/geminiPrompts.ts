@@ -45,6 +45,8 @@ export function buildExamQuestionsPrompt(params: {
     filesHint,
     `Nível de dificuldade: ${difficulty}.`,
     "Cada questão deve ter 5 alternativas (A, B, C, D, E).",
+    "IMPORTANTE: Distribua as respostas corretas de forma aleatória entre as alternativas A, B, C, D e E — não concentre as respostas certas sempre nas mesmas letras. A distribuição das letras corretas ao longo das questões deve ser equilibrada e imprevisível.",
+    "As alternativas incorretas devem ser claramente distintas entre si e da correta — varie o tipo de distrator: conceitos relacionados mas incorretos, inversões de causa/efeito, generalizações falsas e valores plausíveis mas errados.",
     "Retorne as questões em um formato estruturado adequado para uso pedagógico.",
   ]
     .filter(Boolean)
@@ -65,6 +67,7 @@ export function buildAnswerKeyPrompt(params: {
     `A prova possui ${numQuestions} questões.`,
     filesHint,
     "Retorne um array de letras (A, B, C, D ou E) correspondente a cada questão.",
+    "IMPORTANTE: Distribua as letras corretas de forma aleatória e equilibrada — não repita as mesmas letras consecutivamente nem concentre as respostas em A ou B.",
   ]
     .filter(Boolean)
     .join("\n");

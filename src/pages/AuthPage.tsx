@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Dithering } from "@paper-design/shaders-react";
@@ -10,26 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { GoogleIcon } from "@/components/icons/BrandIcons";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsDark } from "@/hooks/useIsDark";
+import { usePrimaryHex } from "@/hooks/usePrimaryHex";
 import { normalizeAccessCode } from "@/lib/accessCode";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-
-function useIsDark() {
-  const [isDark, setIsDark] = useState(
-    () => typeof document !== "undefined" && document.documentElement.classList.contains("dark"),
-  );
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-    return () => observer.disconnect();
-  }, []);
-  return isDark;
-}
+import { useState, useEffect } from "react";
 
 export function AuthPage() {
   const [code, setCode] = useState("");
@@ -37,6 +22,7 @@ export function AuthPage() {
   const navigate = useNavigate();
   const { user, login, loginAnonymously } = useAuth();
   const isDark = useIsDark();
+  const primaryHex = usePrimaryHex();
 
   useEffect(() => {
     if (user) navigate("/dashboard", { replace: true });
@@ -69,7 +55,8 @@ export function AuthPage() {
     try {
       await login();
       navigate("/dashboard");
-    } catch {
+    } catch (e) {
+      console.error("Google auth error:", e);
       toast.error("Falha na autenticação com Google.");
     }
   };
@@ -149,15 +136,17 @@ const handleAnonymousLogin = async () => {
 
         {/* Dithering panel — desktop only */}
         <div className="relative hidden flex-1 p-4 md:block lg:p-8">
-          <Dithering
-            colorBack={isDark ? "#000000" : "#ffffff"}
-            colorFront="#aff33e"
-            shape="warp"
-            type="4x4"
-            speed={0.8}
-            className="h-full w-full rounded-xl opacity-60"
-            minPixelRatio={1}
-          />
+          <div className="pointer-events-none absolute inset-4 lg:inset-8 opacity-40 mix-blend-multiply rounded-xl overflow-hidden">
+            <Dithering
+              colorBack={isDark ? "#000000" : "#ffffff"}
+              colorFront={primaryHex}
+              shape="warp"
+              type="4x4"
+              speed={0.8}
+              className="h-full w-full"
+              minPixelRatio={1}
+            />
+          </div>
           <div className="absolute inset-4 lg:inset-8 rounded-xl ring-1 ring-border/40 pointer-events-none" />
         </div>
       </div>
