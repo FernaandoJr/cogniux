@@ -83,7 +83,7 @@ export function ExamDetail() {
       const timer = setTimeout(() => printSubmission(), 100);
       return () => clearTimeout(timer);
     }
-  }, [submissionToPrint]);
+  }, [submissionToPrint, printSubmission]);
 
   if (!examId) return null;
   if (loading && !exam) return (
@@ -324,8 +324,8 @@ export function ExamDetail() {
                 </div>
                 <div className="flex flex-col items-center gap-2 shrink-0">
                   <QRCodeSVG
-                    value={JSON.stringify({ examId: exam.id, subject: exam.subject })}
-                    size={90}
+                    value={`${window.location.origin}/online/${exam.id}`}
+                    size={140}
                     fgColor="black"
                     marginSize={2}
                   />

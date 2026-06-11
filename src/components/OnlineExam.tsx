@@ -132,7 +132,7 @@ function OnlineExamContent({
       }
 
       await batch.commit();
-      setStep("finished");
+      navigate("/", { replace: true });
     } catch {
       toast.error("Erro ao enviar respostas.");
     } finally {

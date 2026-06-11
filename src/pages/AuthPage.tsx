@@ -1,24 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { Dithering } from "@paper-design/shaders-react";
 import { toast } from "sonner";
 import { LandingNavbar } from "@/components/landing/Navbar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { GoogleIcon } from "@/components/icons/BrandIcons";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsDark } from "@/hooks/useIsDark";
 import { usePrimaryHex } from "@/hooks/usePrimaryHex";
-import { normalizeAccessCode } from "@/lib/accessCode";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 export function AuthPage() {
-  const [code, setCode] = useState("");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user, login, loginAnonymously } = useAuth();
   const isDark = useIsDark();
@@ -27,29 +18,6 @@ export function AuthPage() {
   useEffect(() => {
     if (user) navigate("/dashboard", { replace: true });
   }, [user, navigate]);
-
-  const handleEnterExam = async () => {
-    if (!code.trim()) return;
-    try {
-      setLoading(true);
-      const normalized = normalizeAccessCode(code);
-      const tokenSnap = await getDoc(doc(db, "access_tokens", normalized));
-      if (tokenSnap.exists()) {
-        const tokenData = tokenSnap.data();
-        if (tokenData.isUsed) {
-          toast.error("Este código de acesso já foi utilizado.");
-          return;
-        }
-        navigate(`/online/${tokenData.examId}?token=${normalized}`);
-        return;
-      }
-      navigate(`/online/${code.trim()}`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erro ao verificar código.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleProfessorLogin = async () => {
     try {
@@ -61,7 +29,7 @@ export function AuthPage() {
     }
   };
 
-const handleAnonymousLogin = async () => {
+  const handleAnonymousLogin = async () => {
     try {
       await loginAnonymously();
       navigate("/dashboard");
@@ -74,58 +42,23 @@ const handleAnonymousLogin = async () => {
     <>
       <LandingNavbar disableSticky forceBlur />
       <div className="flex h-[calc(100dvh-3.5rem)] w-full overflow-hidden bg-white dark:bg-black">
-        {/* Form panel */}
         <div className="flex flex-1 items-center justify-center overflow-y-auto p-8">
           <div className="w-full max-w-md space-y-8">
-            {/* Student section */}
             <div className="space-y-2">
-              <h1 className="text-2xl font-semibold tracking-tight">Acessar Atividade</h1>
+              <h1 className="text-2xl font-semibold tracking-tight">Acesso do Professor</h1>
               <p className="text-muted-foreground text-sm">
-                Cole o código fornecido pelo seu professor.
+                Entre com sua conta para criar e gerenciar avaliações.
               </p>
             </div>
 
             <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="exam-code">Código da Atividade</Label>
-                <Input
-                  id="exam-code"
-                  placeholder="Ex: ABC123"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleEnterExam()}
-                  autoComplete="off"
-                />
-              </div>
-              <Button
-                className="w-full"
-                disabled={!code.trim() || loading}
-                onClick={handleEnterExam}
-              >
-                Entrar na Atividade
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="relative">
-              <Separator />
-              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-black px-3 text-xs text-muted-foreground uppercase tracking-widest">
-                Professor
-              </span>
-            </div>
-
-            {/* Professor section */}
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Acesse sua conta para criar e gerenciar avaliações.
-              </p>
-              <Button variant="outline" className="w-full" onClick={handleProfessorLogin}>
+              <Button variant="outline" className="w-full cursor-pointer" onClick={handleProfessorLogin}>
                 <GoogleIcon className="mr-2 h-4 w-4" />
-                Google
+                Entrar com Google
               </Button>
               <Button
                 variant="ghost"
-                className="w-full text-muted-foreground"
+                className="w-full text-muted-foreground cursor-pointer"
                 onClick={handleAnonymousLogin}
               >
                 Continuar sem conta
@@ -134,7 +67,6 @@ const handleAnonymousLogin = async () => {
           </div>
         </div>
 
-        {/* Dithering panel — desktop only */}
         <div className="relative hidden flex-1 p-4 md:block lg:p-8">
           <div className="pointer-events-none absolute inset-4 lg:inset-8 opacity-40 mix-blend-multiply rounded-xl overflow-hidden">
             <Dithering

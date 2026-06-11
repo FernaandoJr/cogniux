@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/routes/ProtectedRoute";
 import { ProfessorLayout } from "@/routes/ProfessorLayout";
 import { LandingPage } from "@/pages/LandingPage";
 import { AuthPage } from "@/pages/AuthPage";
+import { StudentPage } from "@/pages/StudentPage";
 import { Dashboard } from "@/components/Dashboard";
 import { ExamsPage } from "@/pages/ExamsPage";
 import { ExamCreatorPage } from "@/pages/ExamCreatorPage";
@@ -14,7 +15,8 @@ export function AppRouter() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/portal" element={<Navigate to="/auth" replace />} />
+      <Route path="/alunos" element={<StudentPage />} />
+      <Route path="/portal" element={<Navigate to="/alunos" replace />} />
       <Route path="/online/:examId" element={<OnlineExam />} />
 
       <Route element={<ProtectedRoute />}>

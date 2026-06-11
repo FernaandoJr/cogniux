@@ -68,6 +68,12 @@ export function LandingNavbar({
                 {link.label}
               </a>
             ))}
+            <Link
+              to="/alunos"
+              className={cn(buttonVariants({ variant: "ghost" }), "rounded-md")}
+            >
+              Alunos
+            </Link>
           </div>
         </div>
 
@@ -123,6 +129,13 @@ export function LandingNavbar({
               {link.label}
             </a>
           ))}
+          <Link
+            to="/alunos"
+            className={cn(buttonVariants({ variant: "ghost" }), "justify-start")}
+            onClick={() => setOpen(false)}
+          >
+            Alunos
+          </Link>
           <div className="pt-2 border-t flex flex-col gap-2">
             {isLoggedIn ? (
               <Link
